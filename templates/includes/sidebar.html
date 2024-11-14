@@ -1,0 +1,26 @@
+{% load static %}
+<div class="col-lg-4 col-md-6 col-sm-8">
+    <div class="product__sidebar">
+        <div class="product__sidebar__view">
+            <div class="section-title">
+                <h5>Top Views</h5>
+            </div>
+            <ul class="filter__controls">
+                <li class="active" data-filter="*"><a href="?filter=day" class="text text-white">Day</a></li>
+                <li data-filter=".week"><a href="?filter=week" class="text text-white">Week</a></li>
+                <li data-filter=".month"><a href="?filter=month" class="text text-white">Month</a></li>
+                <li data-filter=".years"><a href="?filter=years" class="text text-white">Years</a></li>
+            </ul>
+            <div class="filter__gallery">
+                {% for serial in sidebar %}
+                    <div class="product__sidebar__view__item set-bg" data-setbg="{{ serial.image.url }}">
+                        <div class="ep">{{ serial.serial_episodes.count  }} EP</div>
+                        <h5><a href="{{ serial.get_absolute_url }}">{{ serial.title }}</a></h5>
+                    </div>
+                {% empty %}
+                    <p>No serials found for this time period.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

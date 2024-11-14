@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block main %}
+    <section class="blog-details spad">
+        <div class="container">
+            <div class="row d-flex justify-content-center">
+                <div class="col-lg-8">
+                    <div class="blog__details__title">
+                        <h6>{% for genre in blog.genre.all %}
+                            {{ genre.name }}{% endfor %}<span>- {{ blog.created_at }}</span></h6>
+                        <h2>{{ blog.title }}</h2>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="blog__details__pic">
+                        <img src="{{ blog.image.url }}" alt="">
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="blog__details__content">
+                        <div class="blog__details__text">
+                            <p>{{ blog.description }}</p>
+                        </div>
+                        {% for content in blog.blog_contents.all %}
+                            <div class="blog__details__item__text">
+                                <h4>{{ content.title }}</h4>
+                                <img src="{{ content.blog_image.url }}" alt="">
+                                <p>{{ content.description }}</p>
+                            </div>
+                        {% endfor %}
+                        <div class="blog__details__comment">
+                            <h4>{{ blog.comments_blog.count }} Comments</h4>
+                            {% for comment in blog.comments_blog.all %}
+                                {% if comment.parent == None %}
+                                    <div class="blog__details__comment__item" id="comment-list">
+                                    <div class="blog__details__comment__item__pic">
+                                        <img src="{{ comment.user.profile_image.url }}" style="border-radius: 100%"
+                                             width="50px" height="50px">
+                                    </div>
+                                    <div class="blog__details__comment__item__text">
+                                        <span>{{ comment.created_at }}</span>
+                                        <h5>{{ comment.user }}</h5>
+                                        <p>{{ comment.text }}</p>
+                                        <a onclick="set_value({{ comment.id }})">Reply</a>
+                                    </div>
+                                {% endif %}
+                            {% for reply in comment.replies.all %}
+                                <div class="blog__details__comment__item blog__details__comment__item--reply"
+                                     id="comment-reply-list">
+                                    <div class="blog__details__comment__item__pic">
+                                        <img src="{{ reply.user.profile_image.url }}" style="border-radius: 100%"
+                                             width="50px" height="50px">
+                                    </div>
+                                    <div class="blog__details__comment__item__text">
+                                        <span>{{ reply.created_at }}</span>
+                                        <h5>{{ reply.user }}</h5>
+                                        <p>{{ reply.text }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            </div>
+                            {% endfor %}
+                            <div class="blog__details__form">
+                                <h4>Leave A Commnet</h4>
+                                <form method="post" id="comment-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="parent_id" id="parent-id">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <textarea placeholder="Message" name="text" id="text"></textarea>
+                                            <button type="submit" class="site-btn">Send Message</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
+    <!-- Blog Details Section End -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#comment-form').on('submit', function (e) {
+                e.preventDefault(); // Prevent default form submission
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "blog:blog_details" blog.slug %}',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            // ایجاد HTML برای کامنت جدید
+                            var newCommentHTML = '<div class="blog__details__comment__item__pic">' +
+                                '<img src="' + response.user_profile_image + '" style="border-radius: 100%" width="50px" height="50px">' +
+                                '</div>' +
+                                '<div class="blog__details__comment__item__text">' +
+                                '<span>' + response.created_at + '</span>' +
+                                '<h5>' + response.user_username + '</h5>' +
+                                '<p>' + response.comment_text + '</p>' +
+                                '</div>';
+
+                            // بررسی اینکه آیا parent_id وجود دارد یا خیر
+                            var parentId = $('#parent-id').val();
+                            if (parentId) {
+                                // اضافه کردن کامنت جدید به بخش پاسخ‌ها
+                                $('#comment-reply-list').prepend(newCommentHTML);
+                            } else {
+                                // اضافه کردن کامنت جدید به بالای لیست کامنت‌ها
+                                $('#comment-list').prepend(newCommentHTML);
+                            }
+
+                            $('#comment-form textarea[name="text"]').val(''); // پاک کردن textarea
+                            $('#parent-id').val(''); // پاک کردن parent-id بعد از ارسال
+                        } else {
+                            alert('Error: ' + JSON.stringify(response.errors));
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script>
+        function set_value(id) {
+            document.getElementById("text").placeholder = "Type Your Reply";
+            document.getElementById("parent-id").value = id;
+            window.location.href = "#text"
+        }
+    </script>
+{% endblock %}

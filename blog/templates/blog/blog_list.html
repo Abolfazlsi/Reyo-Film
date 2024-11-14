@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block main %}
+    <section class="blog spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-11">
+                    <div class="row">
+                        {% for blog in blog_list %}
+                            <div class="col-lg-6 col-md-6 col-sm-6">
+                                <div class="blog__item small__item set-bg" data-setbg="{{ blog.image.url }}">
+                                    <div class="blog__item__text">
+                                        <p><span class="icon_calendar"></span> {{ blog.created_at }}</p>
+                                        <h4><a href="{{ blog.get_absolute_url }}">{{ blog.title }}</a></h4>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="product__pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="bg-danger">«</a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num == 1 or num == page_obj.paginator.num_pages %}
+                        <a href="?page={{ num }}"
+                           class="{% if num == page_obj.number %}text text-danger{% endif %}">{{ num }}</a>
+                    {% elif num >= page_obj.number|add:-1 and num <= page_obj.number|add:1 %}
+                        <a href="?page={{ num }}"
+                           class="{% if num == page_obj.number %}text text-danger{% endif %}">{{ num }}</a>
+                    {% elif num == page_obj.number|add:-2 and num > 1 %}
+                        <span class="text text-white">...</span>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="bg-danger">»</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

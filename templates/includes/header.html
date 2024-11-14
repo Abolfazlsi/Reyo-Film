@@ -1,0 +1,57 @@
+{% load static %}
+<header class="header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-2">
+                <div class="header__logo">
+                    <img src="{% static "img/logo.png" %}" alt="">
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="header__nav">
+                    <nav class="header__menu mobile-menu">
+                        <ul>
+                            <li class="{% if request.resolver_match.url_name == "home" %}active{% endif %}"><a
+                                    href="{% url "home:home" %}">Homepage</a></li>
+                            <li class="{% if request.resolver_match.url_name == "serials_list" or request.resolver_match.url_name == "search" %}active{% endif %}">
+                                <a href="{% url "serial:serials_list" %}">Serial</a></li>
+                            <li class="{% if request.resolver_match.url_name == "category_detail" %}active{% endif %}">
+                                <a>Categories <span class="arrow_carrot-down"></span></a>
+                                <ul class="dropdown">
+                                    {% for category in category_list %}
+                                        <li>
+                                            <a href="{% url "serial:category_detail" category.slug %}">{{ category.name }}</a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            <li class="{% if request.resolver_match.url_name == "blog_list" %}active{% endif %}">
+                                <a href="{% url "blog:blog_list" %}">Our Blog</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="header__right">
+                    <a href="#" class="search-switch"><span class="icon_search"></span></a>
+                    {% if request.user.is_authenticated %}
+                        {% if request.user.profile_image %}
+                            <a href="{% url "account:user_profile" %}">
+                                <img class="profile_image" src="{{ request.user.profile_image.url }}">
+                            </a>
+                        {% else %}
+                            <img class="profile_image" src="{% static "img/d_profile.png" %}">
+                        {% endif %}
+                        <a href="{% url 'account:logout' %}" class="btn btn-outline-danger" id="box_logout"><span>Log Out</span></a>
+                    {% else %}
+                        <div class="box_RL">
+                            <a href="{% url 'account:register' %}" class="btn btn-outline-success">Sign Up</a>
+                            <a href="{% url 'account:login' %}" class="btn btn-outline-warning">Sign in</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu-wrap"></div>
+    </div>
+</header>
