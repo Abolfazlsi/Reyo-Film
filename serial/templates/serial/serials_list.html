@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block main %}
+    <!-- Product Section Begin -->
+    <section class="product-page spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="product__page__content">
+                        <div class="product__page__title">
+                            <div class="row">
+                                <div class="col-lg-8 col-md-8 col-sm-6">
+                                    <div class="section-title">
+                                        <h4>Romance</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            {% for serial in serial_list %}
+                                <div class="col-lg-4 col-md-6 col-sm-6">
+                                    <div class="product__item">
+                                        <div class="product__item__pic set-bg" data-setbg="{{ serial.image.url }}">
+                                            <div class="ep">{{ serial.serial_episodes.count }} EP</div>
+                                        </div>
+                                        <div class="product__item__text">
+                                            <ul>
+                                                {% if serial.status %}
+                                                    <li>Active</li>
+                                                {% else %}
+                                                    <li>not played</li>
+                                                {% endif %}
+                                                {% for type in serial.type.all %}
+                                                    <li>{{ type.name }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            <h5><a href="{{ serial.get_absolute_url }}">{{ serial.title }}</a></h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="product__pagination">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}" class="bg-danger">«</a>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if num == 1 or num == page_obj.paginator.num_pages %}
+                                <a href="?page={{ num }}"
+                                   class="{% if num == page_obj.number %}text text-danger{% endif %}">{{ num }}</a>
+                            {% elif num >= page_obj.number|add:-1 and num <= page_obj.number|add:1 %}
+                                <a href="?page={{ num }}"
+                                   class="{% if num == page_obj.number %}text text-danger{% endif %}">{{ num }}</a>
+                            {% elif num == page_obj.number|add:-2 and num > 1 %}
+                                <span class="text text-white">...</span>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="bg-danger">»</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% include 'includes/sidebar.html' %}
+            </div>
+        </div>
+    </section>
+    <!-- Product Section End -->
+{% endblock %}

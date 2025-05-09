@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block main %}
+    <!-- Breadcrumb Begin -->
+    <div class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__links">
+                        <a href="{% url "home:home" %}"><i class="fa fa-home"></i> Home</a>
+                        <a href="{% url "serial:serials_list" %}">Serials</a>
+                        <span>Romance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Breadcrumb End -->
+
+    <!-- Anime Section Begin -->
+    <section class="anime-details spad">
+        <div class="container">
+            <div class="anime__details__content">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="anime__details__pic set-bg" data-setbg="{{ serial.image.url }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-9">
+                        <div class="anime__details__text">
+                            <div class="anime__details__title">
+                                <h3>{{ serial.title }}</h3>
+                            </div>
+                            <div class="anime__details__rating">
+                                <div class="rating">
+                                    <i class="fa fa-heart text-danger"></i>
+                                </div>
+                                <span class="text text-white" id="rate_count">{{ serial.ratings.count }}</span>
+                            </div>
+                            <p>{{ serial.description }}</p>
+                            <div class="anime__details__widget">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6">
+                                        <ul>
+                                            {% for type in serial.type.all %}
+                                                <li><span>Type:</span>{{ type.name }}</li>
+                                            {% endfor %}
+                                            {% if serial.status == True %}
+                                                <li><span>Status:</span>active</li>
+                                            {% else %}
+                                                <li><span>Status:</span>not played</li>
+                                            {% endif %}
+                                            <li><span>Date aired:</span>{{ serial.date_arid }}</li>
+                                            <li><span>Studios:</span> {{ serial.studio }}</li>
+                                            <li><span>Genre:</span>{% for genre in serial.genre.all %}
+                                                {{ genre.name }}, {% endfor %}</li>
+
+                                        </ul>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6">
+                                        <ul>
+                                            <li><span>Scores:</span> {{ serial.score }} / 10</li>
+                                            <li><span>Duration:</span> {{ serial.duration }}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="anime__details__btn">
+                                {% if is_rate %}
+                                    <a onclick="rating('{{ serial.slug }}')" class="follow-btn">
+                                        <i class="fa fa-heart" id="rating"></i>
+                                    </a>
+                                {% else %}
+                                    <a onclick="rating('{{ serial.slug }}')" class="follow-btn">
+                                        <i class="fa fa-heart-o" id="rating"></i>
+                                    </a>
+                                {% endif %}
+                                <a href="{% url "serial:serial_download" serial.slug %}" class="watch-btn"><span>Watch Now</span>
+                                    <i
+                                            class="fa fa-angle-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-8 col-md-8">
+                    <div class="anime__details__review" id="comment-list">
+                        {% for comment in serial.comments.all %}
+                            <div class="anime__review__item">
+                                <div class="anime__review__item__pic">
+                                    <img src="{{ comment.user.profile_image.url }}" alt="">
+                                </div>
+                                <div class="anime__review__item__text">
+                                    <h6>{{ comment.user }}- <span>{{ comment.time_since_creation }}</span></h6>
+                                    <p>{{ comment.text }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="anime__details__form">
+                        <div class="section-title">
+                            <h5>Your Comment</h5>
+                        </div>
+                        <form method="post" id="comment-form">
+                            {% csrf_token %}
+                            <textarea placeholder="Write ..." name="text"></textarea>
+                            <button type="submit"><i class="fa fa-location-arrow"></i> Review</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="anime__details__sidebar">
+                        <div class="section-title">
+                            <h5>you might like...</h5>
+                        </div>
+                        {% for random in random_serials %}
+                            <div class="product__sidebar__view__item set-bg" data-setbg="{{ random.image.url }}">
+                                <div class="ep">{{ random.serial_episodes.count }} EP</div>
+                                <h5><a href="{{ random.get_absolute_url }}">{{ random.title }}</a></h5>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Anime Section End -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#comment-form').on('submit', function (e) {
+                e.preventDefault(); // Prevent default form submission
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "serial:serial_detail" serial.slug %}',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            // ایجاد HTML برای کامنت جدید
+                            var newCommentHTML = '<div class="anime__review__item">' +
+                                '<div class="anime__review__item__pic">' +
+                                '<img src="' + response.user_profile_image + '" alt="">' +
+                                '</div>' +
+                                '<div class="anime__review__item__text">' +
+                                '<h6>' + response.user_username + ' - <span>' + response.created_at + '</span></h6>' + // Assuming you want to keep the time since creation as is
+                                '<p>' + response.comment_text + '</p>' +
+                                '</div>' +
+                                '</div>';
+
+                            // اضافه کردن کامنت جدید به بالای لیست کامنت‌ها
+                            $('#comment-list').prepend(newCommentHTML);
+                            $('#comment-form textarea[name="text"]').val(''); // پاک کردن textarea
+                        } else {
+                            alert('Error: ' + JSON.stringify(response.errors));
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

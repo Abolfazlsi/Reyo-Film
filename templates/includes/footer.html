@@ -1,0 +1,27 @@
+{% load static %}
+<footer class="footer">
+    <div class="page-up">
+        <a href="#" id="scrollToTopButton"><span class="arrow_carrot-up"></span></a>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="footer__logo">
+                    <img src="{% static "img/logo.png" %}" alt="">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="footer__nav">
+                    <ul>
+                        <li><a class="{% if request.resolver_match.url_name == "home" %}text text-danger{% endif %}"
+                               href="{% url 'home:home' %}">Homepage</a></li>
+                        <li><a class="{% if request.resolver_match.url_name == "serials_list" or request.resolver_match.url_name == "category_detail" %}text text-danger{% endif %}"
+                               href="{% url 'serial:serials_list' %}">Serials</a></li>
+                        <li><a class="{% if request.resolver_match.url_name == "blog_list" %}text text-danger{% endif %}"
+                               href="{% url "blog:blog_list" %}">Our Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

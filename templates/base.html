@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zxx">
+
+<head>
+    {% include 'includes/head_references.html' %}
+</head>
+
+<body>
+
+<!-- Page Preloder -->
+{#    {% include 'includes/header.html' %}#}
+
+
+<!-- Header Section Begin -->
+{% include 'includes/header.html' %}
+<!-- Header End -->
+
+
+{% block main %}
+
+    
+    
+{% endblock %}
+
+
+
+<!-- Footer Section Begin -->
+{% include 'includes/footer.html' %}
+<!-- Footer Section End -->
+
+<!-- Search model Begin -->
+{% include 'includes/search_model.html' %}
+<!-- Search model end -->
+
+<!-- Js Plugins -->
+{% include 'includes/js_references.html' %}
+</body>
+
+</html>

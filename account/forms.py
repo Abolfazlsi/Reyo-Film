@@ -5,12 +5,10 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 from account.models import User
+from django.core.exceptions import ValidationError
 
 
 class UserCreationForm(forms.ModelForm):
-    """A form for creating new users. Includes all the required
-    fields, plus a repeated password."""
-
     password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
     password2 = forms.CharField(
         label="Password confirmation", widget=forms.PasswordInput
@@ -21,7 +19,6 @@ class UserCreationForm(forms.ModelForm):
         fields = ["username"]
 
     def clean_password2(self):
-        # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
@@ -29,7 +26,6 @@ class UserCreationForm(forms.ModelForm):
         return password2
 
     def save(self, commit=True):
-        # Save the provided password in hashed format
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         if commit:
@@ -38,13 +34,39 @@ class UserCreationForm(forms.ModelForm):
 
 
 class UserChangeForm(forms.ModelForm):
-    """A form for updating users. Includes all the fields on
-    the user, but replaces the password field with admin's
-    disabled password hash display field.
-    """
-
     password = ReadOnlyPasswordHashField()
 
     class Meta:
         model = User
         fields = ["username", "password", "is_active", "is_admin"]
+
+
+class RegisterForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("username", "email", "password")
+        widgets = {
+            "username": forms.TextInput(attrs={"class": "input__item", "placeholder": "Your Name"}),
+            "email": forms.EmailInput(attrs={"class": "input__item", "placeholder": "Your Email"}),
+            "password": forms.PasswordInput(attrs={"class": "input__item", "placeholder": "Your Password"}),
+        }
+
+    def clean(self):
+        email = self.cleaned_data.get("email")
+        username = self.cleaned_data.get("username")
+
+        if User.objects.filter(email=email, username=username).exists():
+            raise ValidationError("Email already registered!", code="invalid_email")
+        if User.objects.filter(username=username).exists():
+            raise ValidationError("username already registered!", code="invalid_username")
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(widget=forms.TextInput(attrs={"class": "input__item", "placeholder": "Username"}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "input__item", "placeholder": "Password"}))
+
+
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("email", "username", "profile_image")
